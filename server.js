@@ -12,10 +12,18 @@ const server = express()
 
 const io = socketIO(server);
 
+function emitClientsCount() {
+  io.emit("clientsCount", io.engine.clientsCount);
+}
+
 io.on("connection", socket => {
-  console.log("Client connected");
-  socket.on("disconnect", () => console.log("Client disconnected"));
-  socket.on("chat message", function(msg) {
-    io.emit("chat message", msg);
+  emitClientsCount();
+  socket.on("disconnect", emitClientsCount);
+
+  socket.on("clap", function() {
+    io.emit("clap", {
+      ts: new Date(),
+      socketId: socket.id
+    });
   });
 });

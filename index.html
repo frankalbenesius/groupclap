@@ -1,68 +1,127 @@
 <!DOCTYPE html>
-<html>
+<html class="no-js" lang="">
   <head>
-    <title>clap</title>
+    <title>we can clap</title>
+    <meta charset="utf-8" />
+    <meta name="description" content="" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+
     <style>
-      * {
-        margin: 0;
-        padding: 0;
-        box-sizing: border-box;
-      }
+      html,
       body {
-        font: 13px Helvetica, Arial;
-      }
-      form {
-        background: #000;
-        padding: 3px;
-        position: fixed;
-        bottom: 0;
-        width: 100%;
-      }
-      form input {
-        border: 0;
-        padding: 10px;
-        width: 90%;
-        margin-right: 0.5%;
-      }
-      form button {
-        width: 9%;
-        background: rgb(130, 224, 255);
-        border: none;
-        padding: 10px;
-      }
-      #messages {
-        list-style-type: none;
         margin: 0;
-        padding: 0;
+        font-size: 40px;
       }
-      #messages li {
-        padding: 5px 10px;
+      main {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100vh;
+        width: 100vw;
       }
-      #messages li:nth-child(odd) {
-        background: #eee;
+      #clapButton {
+        background: #5bb65b;
+        color: white;
+        padding: 0.25rem 0.5rem;
+        border: none;
+        font-size: 1rem;
+        border-radius: 0.1rem;
+      }
+      #clapButton:active {
+        background-color: #499249;
+      }
+      #clapZone {
+        z-index: -1;
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100vw;
+        height: 100vh;
+      }
+      .clap {
+        position: absolute;
+        -webkit-animation: fadeOut 2s ease-in-out;
+        animation: fadeOut 2s ease-in-out;
+        animation-fill-mode: forwards;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 1.5em;
+        height: 1.5em;
+      }
+      .clap.mine {
+        background: rgba(91, 182, 91, 0.3);
+      }
+      @keyframes fadeOut {
+        0% {
+          opacity: 1;
+        }
+        100% {
+          opacity: 0;
+        }
+      }
+      #clappersCount {
+        font: 16px monospace;
+        position: absolute;
+        top: 0;
+        left: 0;
       }
     </style>
+
     <script src="/socket.io/socket.io.js"></script>
-    <script src="https://code.jquery.com/jquery-1.11.1.js"></script>
     <script>
-      $(function() {
-        var socket = io();
-        $("#form").submit(function(e) {
-          e.preventDefault(); // prevents page reloading
-          socket.emit("chat message", $("#input").val());
-          $("#input").val("");
-          return false;
+      window.onload = () => {
+        const socket = io();
+        const CLAP_DURATION = 2 * 1000; // matches css keyframes
+
+        // emit clap
+        document.querySelector("#clapButton").addEventListener("click", e => {
+          e.preventDefault();
+          socket.emit("clap");
         });
-        socket.on("chat message", function(msg) {
-          $("#messages").append($("<li>").text(msg));
+
+        // respond to claps
+        socket.on("clap", displayClap);
+        function displayClap(clap) {
+          const { ts, socketId } = clap;
+          const clapEl = document.createElement("div");
+          const clapZoneEl = document.getElementById("clapZone");
+          const clapContent = document.createTextNode("👏");
+
+          // apply classes
+          clapEl.classList.add("clap");
+          if (socketId === socket.id) {
+            clapEl.classList.add("mine");
+          }
+
+          // random placement
+          clapEl.style.left = Math.random() * 95 + "vw";
+          clapEl.style.top = Math.random() * 95 + "vh";
+
+          // add to DOM
+          clapEl.appendChild(clapContent);
+          clapZoneEl.appendChild(clapEl);
+
+          // remove from DOM
+          setTimeout(() => {
+            clapEl.remove();
+          }, CLAP_DURATION);
+        }
+
+        // respond to client count
+        const clappersCountEl = document.getElementById("clappersCount");
+        socket.on("clientsCount", count => {
+          clappersCountEl.innerHTML = `${count} Clappers`;
         });
-      });
+      };
     </script>
   </head>
   <body>
-    <ul id="messages"></ul>
-    <form action="" id="form">
-      <input id="input" autocomplete="off" /><button>Send</button>
-    </form>
+    <main>
+      <div id="clapZone"></div>
+      <button id="clapButton">CLAP!</button>
+      <div id="clappersCount">0 Clappers</div>
+    </main>
   </body>
 </html>

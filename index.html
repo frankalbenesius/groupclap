@@ -96,6 +96,8 @@
           }
 
           // random placement
+          // using 95 cause position is top left corner and i don't want
+          // any of these good, good claps to be hidden 🤷‍♀️
           clapEl.style.left = Math.random() * 95 + "vw";
           clapEl.style.top = Math.random() * 95 + "vh";
 
@@ -103,10 +105,26 @@
           clapEl.appendChild(clapContent);
           clapZoneEl.appendChild(clapEl);
 
+          playClapSound();
+
           // remove from DOM
           setTimeout(() => {
             clapEl.remove();
           }, CLAP_DURATION);
+        }
+
+        function playClapSound() {
+          const clapFiles = [
+            "clap1.mp3",
+            "clap2.mp3",
+            "clap3.mp3",
+            "clap4.mp3"
+          ];
+          const randomIndex = Math.floor(Math.random() * clapFiles.length);
+          const randomClapFile = clapFiles[randomIndex];
+          var audio = new Audio(randomClapFile);
+          audio.play();
+          audio.remove();
         }
 
         // respond to client count
@@ -122,6 +140,9 @@
       <div id="clapZone"></div>
       <button id="clapButton">CLAP!</button>
       <div id="clappersCount">0 Clappers</div>
+      <!-- <audio controls>
+        <source src="clap1.mp3" type="audio/mpeg" />
+      </audio> -->
     </main>
   </body>
 </html>

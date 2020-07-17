@@ -127,12 +127,29 @@
           audio.remove();
         }
 
+        // Helper for testing
+        function testIt() {
+          setInterval(() => {
+            console.log("testing...")
+            socket.emit("clap");
+          }, getRandomInt(3000,5000));
+        }
+
+        function getRandomInt(min, max) {
+          min = Math.ceil(min);
+          max = Math.floor(max);
+          return Math.floor(Math.random() * (max - min)) + min; //The maximum is exclusive and the minimum is inclusive
+        }
+
         // respond to client count
         const clappersCountEl = document.getElementById("clappersCount");
         socket.on("clientsCount", count => {
           clappersCountEl.innerHTML = `${count} Clappers`;
         });
+
+        //testIt();
       };
+
     </script>
   </head>
   <body>
